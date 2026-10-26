@@ -1,0 +1,76 @@
+experiment_id=20260915-154720
+repeats=3
+threads=1
+beamwidth=8
+topk=10
+pipeann_high_l=20 40 80
+pipeann_representative_l=40
+gateann_high_l=160 320 640
+gateann_representative_l=320
+io_backend=aio
+pipeann_repo=/home/user/fvs-course-lab/systems/PipeANN
+pipeann_commit=2ec84fe20c37dc3cc236b66f7eba31c0cc80bf1e
+gateann_repo=/home/user/fvs-course-lab/systems/GateANN-public
+gateann_commit=71e87cbf0e25c0400c0109dd25a64a7c4dccc9dd
+gateann_patch_sha256=d90657151bf1adc735bc6916e4120690a64288281fe76ac24ad2e4a859662bc1  /home/user/fvs-course-lab/patches/gateann_aio_compat.patch
+
+[uname]
+Linux Lucifer 5.15.167.4-microsoft-standard-WSL2 #1 SMP Tue Nov 5 00:21:55 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux
+
+[lscpu]
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        39 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               12
+On-line CPU(s) list:                  0-11
+Vendor ID:                            GenuineIntel
+Model name:                           Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
+CPU family:                           6
+Model:                                165
+Thread(s) per core:                   2
+Core(s) per socket:                   6
+Socket(s):                            1
+Stepping:                             2
+BogoMIPS:                             5184.05
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology cpuid pni pclmulqdq vmx ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch invpcid_single ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi ept vpid ept_ad fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt xsaveopt xsavec xgetbv1 xsaves md_clear flush_l1d arch_capabilities
+Virtualization:                       VT-x
+Hypervisor vendor:                    Microsoft
+Virtualization type:                  full
+L1d cache:                            192 KiB (6 instances)
+L1i cache:                            192 KiB (6 instances)
+L2 cache:                             1.5 MiB (6 instances)
+L3 cache:                             12 MiB (1 instance)
+Vulnerability Gather data sampling:   Unknown: Dependent on hypervisor status
+Vulnerability Itlb multihit:          KVM: Mitigation: VMX disabled
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Mitigation; Clear CPU buffers; SMT Host state unknown
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Mitigation; Enhanced IBRS
+Vulnerability Spec rstack overflow:   Not affected
+Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:             Mitigation; Enhanced / Automatic IBRS; IBPB conditional; RSB filling; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop
+Vulnerability Srbds:                  Unknown: Dependent on hypervisor status
+Vulnerability Tsx async abort:        Not affected
+
+[memory]
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       737Mi       4.0Gi       3.2Mi        11Gi        14Gi
+Swap:          4.0Gi          0B       4.0Gi
+
+[block-devices]
+NAME MODEL          SIZE ROTA TRAN
+sda  Virtual Disk 388.4M    1 
+sdb  Virtual Disk     4G    1 
+sdc  Virtual Disk     1T    1 
+sdd  Virtual Disk     1T    1 
+
+[compiler]
+c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+

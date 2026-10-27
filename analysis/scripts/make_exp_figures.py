@@ -81,29 +81,30 @@ plt.close()
 # ---------------- Fig 2-1 PipeANN-Filter
 fig, ax = plt.subplots(figsize=(6.3, 4.2))
 ax.set_xlim(0, 100); ax.set_ylim(0, 100); ax.axis("off")
-ax.add_patch(Rectangle((1, 68), 98, 29, facecolor="#FBF6F0", edgecolor="#E8D3BC", linewidth=0.8))
-ax.add_patch(Rectangle((1, 2), 98, 62, facecolor="#F4F7FC", edgecolor="#C9D6EA", linewidth=0.8))
-ax.text(3, 94, "SSD", fontsize=7.5, color=ORANGE, fontweight="bold")
-ax.text(3, 60, "DRAM", fontsize=7.5, color=BLUE, fontweight="bold")
-box(ax, 6, 74, 40, 13, "Vamana 节点页\n邻居 + 坐标 + 属性位", "white", ORANGE, fs=6.9)
-box(ax, 52, 74, 40, 13, "PQ 压缩向量", "white", ORANGE, fs=6.9)
-box(ax, 3, 43, 21, 12, "候选堆 / 开放列表", "white", BLUE, fs=6.5)
-box(ax, 27, 43, 21, 12, "布隆过滤器", "white", BLUE, fs=6.5)
-box(ax, 51, 43, 20, 12, "PQ 码本", "white", BLUE, fs=6.5)
-box(ax, 74, 43, 22, 12, "标签索引", "white", BLUE, fs=6.5)
 
-box(ax, 4, 22, 27, 14, "Pre-filter\n标签索引圈定候选\nPQ 粗排 → 批量读 → 精排", "white", GREEN, fs=6.3)
-box(ax, 36, 22, 27, 14, "In-filter\nbest-first + 布隆粗筛\n可能合格才读 → 验证", "white", GREEN, fs=6.3)
-box(ax, 68, 22, 28, 14, "Post-filter\n先搜索\n返回后再过滤", "white", GREEN, fs=6.3)
-box(ax, 31, 6, 38, 9, "代价模型：SSD 读次数 × 10 + 距离比较次数 × 1", "#F7F7F7", GRAY, fs=6.4)
-arrow(ax, 50, 6 + 9, 50, 22, color=GRAY, lw=0.9)
-arrow(ax, 18, 34, 18, 43, color=GREEN, lw=0.9)
-arrow(ax, 49, 34, 49, 43, color=GREEN, lw=0.9)
-arrow(ax, 81, 34, 81, 43, color=GREEN, lw=0.9)
-arrow(ax, 18, 49, 18, 74, color=ORANGE, lw=0.9)
-arrow(ax, 49, 49, 49, 74, color=ORANGE, lw=0.9)
-ax.text(50, 1.0, "注：三条路径由查询期代价模型选择；In-filter 的布隆假阳性会带来额外读。",
-        ha="center", fontsize=6.0, color="#666666")
+# storage summary
+ax.add_patch(Rectangle((1, 86), 98, 12, facecolor="#FBF6F0", edgecolor="#E8D3BC", linewidth=0.8))
+ax.text(2.5, 92, "SSD：Vamana 节点页（邻居 + 坐标 + 属性位）｜PQ 压缩向量", fontsize=7.4, va="center", color=ORANGE, fontweight="bold")
+ax.add_patch(Rectangle((1, 72), 98, 12, facecolor="#F4F7FC", edgecolor="#C9D6EA", linewidth=0.8))
+ax.text(2.5, 78, "DRAM：候选堆 / 开放列表｜布隆过滤器｜PQ 码本｜标签索引", fontsize=7.4, va="center", color=BLUE, fontweight="bold")
+
+rows = [
+    ("Pre-filter", "① 标签索引圈定候选 → ② PQ 粗排 → ③ 批量读 → ④ 精排",
+     "读：节点页 + PQ 向量\n用：标签索引、PQ 码本、候选堆", GREEN),
+    ("In-filter", "① best-first → ② 布隆粗筛 → ③ 可能合格才读 → ④ 真实验证",
+     "读：节点页\n用：布隆过滤器、候选堆", BLUE),
+    ("Post-filter", "① 先搜索 → ② 返回后再过滤",
+     "读：节点页\n用：候选堆", GRAY),
+]
+for i, (name, process, data, color) in enumerate(rows):
+    y = 50 - i * 19
+    box(ax, 1, y, 15, 14, name, "white", color, fs=7.2, bold=True)
+    box(ax, 19, y, 45, 14, process, "white", color, fs=6.6)
+    box(ax, 67, y, 32, 14, data, "white", color, fs=6.5)
+    arrow(ax, 16, y + 7, 19, y + 7, color=color, lw=1.0)
+    arrow(ax, 64, y + 7, 67, y + 7, color=color, lw=1.0)
+
+box(ax, 18, 2, 64, 9, "代价模型：SSD 读次数 × 10 + 距离比较次数 × 1", "#F7F7F7", GRAY, fs=6.8)
 plt.tight_layout()
 plt.savefig(os.path.join(OUT, "fig_pipeann.png"), dpi=300, bbox_inches="tight")
 plt.close()

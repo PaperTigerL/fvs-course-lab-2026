@@ -1,35 +1,77 @@
-# 构建期标签感知加边的参考实现
+# GateANN 低选择率 prefilter 实现
 
-本目录对应课程实验报告 §5 与 §8.2 的优化设计：在 Vamana 建图完成后，为低频标签的节点补充同标签近邻边，以降低强过滤下 Graph Tunneling 的穿行长度。
+本目录是课程实验 §5 优化的完整实现与探索记录。最终方案不是“构建期加边”，而是**选择率感知的低选择率 prefilter**：内存标签倒排 → PQ 粗排 → top-P 读 SSD → 精确重排。
 
-> **边界说明**：课程《实验说明》明确“优化部分只要求设计与验证计划，不要求实现”。本目录是**参考实现**，用于把边选择逻辑落成可检查的代码与单元测试；它**没有**接入 GateANN 的 C++ 查询路径，也不替代报告 §5 的 Validation Plan。端到端 Recall 是否提升，必须在 GateANN 上按对照实验重跑后才能下结论。
+> 结果（Low L=320，YFCC 1M，3 轮中位数）：基线 34.30% / 0.766 ms / 4.38 I/O；prefilter P=16 **87.15% / 0.673 ms / 16 I/O**；P=32 **96.50% / 0.993 ms / 32 I/O**。Medium/High 不触发 prefilter，保持 72.05%/93.20%。
 
 ## 文件
 
-- `label_aware_edges.py`：标签倒排、标签内 kNN、边合并与度上限控制。
-- `test_label_aware_edges.py`：五个性质测试（同标签、无自环、无重复、度上限、未见标签不受影响）。
-- `README.md`：本文件。
+| 文件 | 作用 |
+|---|---|
+| `../patches/gateann_labelaware_prefilter.patch` | 最终 C++ 实现：`SpmatFilterStore` 倒排、`SSDIndex::prefilter_search`、按标签规模选择路径 |
+| `build_label_edges.py` | 同标签边生成（失败尝试：34.35%，保留作证据） |
+| `build_label_bridges.py` | Low 标签桥边生成（失败尝试：73.75% 但 354 I/O） |
+| `run_prefilter.py` | 基线 vs prefilter 的 3 轮对照矩阵，输出 `analysis/data/optimization_prefilter_results.csv` |
+| `run_labelaware.py` | 加边探索的运行脚本（可选） |
+| `label_aware_edges.py` | 初版同标签边选择参考实现 |
+| `test_label_aware_edges.py` | 6 个性质测试（同标签、无自环、无重复、度上限、未见标签、最小频率） |
 
-## 算法
+## 最终实现
 
-1. 从 `labels[i]`（第 i 个节点的标签集合）构建 `label -> [node_id]` 倒排，并统计频率。
-2. 对频率低于阈值的标签，取该标签下的节点向量，计算标签内 kNN，得到候选同标签边。
-3. 将候选边与原始邻接表合并：原始边优先保留；新增边按距离升序加入；去掉自环与重复边；每个节点的度不超过 `degree_cap`。
-4. 查询期把新增边并入 `FullAdjIndex`（或从旁路文件加载）；Pre-I/O Filtering 与距离计算逻辑不变，Tunneling 沿增强后的邻接表遍历。
+补丁修改四个文件：
 
-## 运行
+1. `include/utils/spmat_filter_store.h`：加载 CSR 标签时构建 `label -> node_ids` 倒排；
+2. `include/ssd_index.h`：声明 `prefilter_search` 与 `label_node_count`；
+3. `src/search/pipe_search.cpp`：枚举标签节点，按 1024 一组算 PQ 距离，保留 top-P；每 32 个候选一批读节点页，精确 L2 重排；
+4. `tests/search_disk_index_yfcc.cpp`：单标签且 `label_node_count <= GATEANN_PREFILTER_MAX_LABEL` 时走 prefilter，否则走原 tunneling。
+
+环境变量：
+
+- `GATEANN_PREFILTER_P`：读取的 top-P 候选数，默认 128；推荐 16（低延迟）或 32（高召回）。
+- `GATEANN_PREFILTER_MAX_LABEL`：启用 prefilter 的标签规模上限，默认 12000；本数据 Low 标签 2,499–8,513 会触发，Medium/High 不触发。
+
+应用：
+
+```bash
+cd systems/GateANN-public
+git apply ../../patches/gateann_labelaware_prefilter.patch
+cmake --build build -j 8
+
+GATEANN_PREFILTER_P=16 GATEANN_PREFILTER_MAX_LABEL=12000 \
+  python3 adapters/gateann_adapter.py search \
+  --repo systems/GateANN-public --dataset-root datasets/yfcc_course_v1 \
+  --tier formal --bucket low --L 320 --run-id opt-low-P16
+```
+
+## 加边探索（为什么被否定）
+
+同标签边：对 15 个工作负载标签用 HNSW 做标签内 k=8 kNN，合并进 `FullAdjIndex`，额外边上限 12。Low L=320 实测 34.35%，与基线 34.30% 基本一致——同标签边只加密合格子图，搜索到不了第一个合格节点时无效。
+
+Low 标签桥边：给每个节点连到最近的 4 个 Low 标签节点，每节点最多 16 条额外边，并让 Filter-Pass 邻居优先进入候选池。Recall 升到 73.75%，但 Mean I/O 354、QPS 109；桥边与查询无关，读入大量远距离合格节点。该负结果直接促成了 prefilter 的设计。
+
+生成脚本：
+
+```bash
+python optimization/build_label_edges.py \
+  --base-u8bin datasets/yfcc_course_v1/formal_1000000/base.u8bin \
+  --base-spmat datasets/yfcc_course_v1/formal_1000000/base.metadata.spmat \
+  --workload-root datasets/yfcc_course_v1/formal_1000000/workloads \
+  --out course_runs/indices/gateann/formal_1000000/yfcc.labelaware.R12
+
+python optimization/build_label_bridges.py \
+  --base-u8bin datasets/yfcc_course_v1/formal_1000000/base.u8bin \
+  --base-spmat datasets/yfcc_course_v1/formal_1000000/base.metadata.spmat \
+  --labels 4780,600,747,113,42 \
+  --out course_runs/indices/gateann/formal_1000000/yfcc.bridge.low.R16
+```
+
+加边文件通过 `GATEANN_EXTRA_EDGES` 加载（可选代码），最终 prefilter 不需要它。
+
+## 单测
 
 ```bash
 python optimization/test_label_aware_edges.py
 python optimization/label_aware_edges.py
 ```
 
-参考实现只依赖 NumPy。生产实现应把标签内 kNN 换成 ANN（例如复用现有图或 PQ 码本），避免低频标签节点数较大时退化为 O(n²)。
-
-## 验证计划（与报告 §5 一致）
-
-- 对照组：当前 GateANN（不启用 label-aware 边增强），3 轮。
-- 自变量：是否启用边增强（on/off）。
-- 控制变量：L=320、threads=1、beamwidth=8、K=10、FullAdj R=32、同样的 200 条查询、同一机器与数据集。
-- 指标：Low / Medium / High 的 Recall@10、Mean Latency、Mean I/O、FilterSkips、Tunnel time。
-- 可证伪预期：Low bucket、L=320 的 Recall 从 34.3% 提升到 85% 以上，且 I/O 增幅小于 1.5 倍；若 Recall 仍低于 50% 或 I/O 增幅超过 3 倍，则否定该优化方向。
+单测只验证初版边选择逻辑（同标签、无自环/重复、度上限、未见标签、最小频率），不能替代端到端实验。

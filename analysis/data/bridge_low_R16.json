@@ -1,0 +1,54 @@
+{
+  "mode": "label_bridge",
+  "n": 1000000,
+  "d": 192,
+  "labels": [
+    4780,
+    600,
+    747,
+    113,
+    42
+  ],
+  "k": 4,
+  "max_extra": 16,
+  "hnsw_m": 24,
+  "ef_construction": 80,
+  "ef_search": 64,
+  "nodes_with_extra": 1000000,
+  "mean_extra_degree": 16.0,
+  "edge_updates": 24612671,
+  "per_label": [
+    {
+      "label": 4780,
+      "nodes": 2499,
+      "bridges": 4997501,
+      "seconds": 10.79
+    },
+    {
+      "label": 600,
+      "nodes": 3995,
+      "bridges": 4996005,
+      "seconds": 12.18
+    },
+    {
+      "label": 747,
+      "nodes": 5450,
+      "bridges": 4994550,
+      "seconds": 13.58
+    },
+    {
+      "label": 113,
+      "nodes": 6993,
+      "bridges": 4993008,
+      "seconds": 13.03
+    },
+    {
+      "label": 42,
+      "nodes": 8513,
+      "bridges": 4991487,
+      "seconds": 13.21
+    }
+  ],
+  "seconds": 71.11,
+  "out": "course_runs/indices/gateann/formal_1000000/yfcc.bridge.low.R16"
+}

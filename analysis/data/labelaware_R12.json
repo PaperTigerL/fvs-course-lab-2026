@@ -1,0 +1,126 @@
+{
+  "base_u8bin": "datasets/yfcc_course_v1/formal_1000000/base.u8bin",
+  "base_spmat": "datasets/yfcc_course_v1/formal_1000000/base.metadata.spmat",
+  "workload_root": "datasets/yfcc_course_v1/formal_1000000/workloads",
+  "n": 1000000,
+  "d": 192,
+  "labels": [
+    5,
+    8,
+    17,
+    24,
+    25,
+    28,
+    35,
+    38,
+    42,
+    89,
+    91,
+    113,
+    600,
+    747,
+    4780
+  ],
+  "k": 8,
+  "max_extra": 12,
+  "hnsw_m": 32,
+  "ef_construction": 80,
+  "ef_search": 64,
+  "nodes_with_extra": 585772,
+  "mean_extra_degree": 10.841,
+  "edge_updates": 9872720,
+  "per_label": [
+    {
+      "label": 5,
+      "nodes": 123232,
+      "knn_edges_directed": 1970534,
+      "seconds": 11.66
+    },
+    {
+      "label": 8,
+      "nodes": 137675,
+      "knn_edges_directed": 2201374,
+      "seconds": 15.41
+    },
+    {
+      "label": 17,
+      "nodes": 99185,
+      "knn_edges_directed": 1585944,
+      "seconds": 17.96
+    },
+    {
+      "label": 24,
+      "nodes": 49947,
+      "knn_edges_directed": 798580,
+      "seconds": 7.62
+    },
+    {
+      "label": 25,
+      "nodes": 17652,
+      "knn_edges_directed": 282224,
+      "seconds": 1.99
+    },
+    {
+      "label": 28,
+      "nodes": 70738,
+      "knn_edges_directed": 1131068,
+      "seconds": 6.35
+    },
+    {
+      "label": 35,
+      "nodes": 36635,
+      "knn_edges_directed": 585776,
+      "seconds": 5.77
+    },
+    {
+      "label": 38,
+      "nodes": 29576,
+      "knn_edges_directed": 472886,
+      "seconds": 5.32
+    },
+    {
+      "label": 42,
+      "nodes": 8513,
+      "knn_edges_directed": 136116,
+      "seconds": 1.03
+    },
+    {
+      "label": 89,
+      "nodes": 170890,
+      "knn_edges_directed": 2732400,
+      "seconds": 18.43
+    },
+    {
+      "label": 91,
+      "nodes": 23617,
+      "knn_edges_directed": 377688,
+      "seconds": 1.13
+    },
+    {
+      "label": 113,
+      "nodes": 6993,
+      "knn_edges_directed": 111828,
+      "seconds": 0.22
+    },
+    {
+      "label": 600,
+      "nodes": 3995,
+      "knn_edges_directed": 63876,
+      "seconds": 0.3
+    },
+    {
+      "label": 747,
+      "nodes": 5450,
+      "knn_edges_directed": 87142,
+      "seconds": 0.16
+    },
+    {
+      "label": 4780,
+      "nodes": 2499,
+      "knn_edges_directed": 39958,
+      "seconds": 0.17
+    }
+  ],
+  "seconds": 98.94,
+  "out": "course_runs/indices/gateann/formal_1000000/yfcc.labelaware.R12"
+}
